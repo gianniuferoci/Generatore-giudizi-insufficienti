@@ -115,14 +115,54 @@ REGOLE ESSENZIALI DI SCRITTURA:
 - ${subjectStr}
 - Stile desiderato: ${formState.tone.toUpperCase()}`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        systemInstruction: systemInstruction,
-        temperature: 0.7,
-      },
-    });
+    // Modelli da provare in ordine di priorità (con fallback robusti sulle versioni stabili)
+    const modelsToTry = [
+      "gemini-3.5-flash",
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-3.1-flash-lite",
+      "gemini-1.5-flash"
+    ];
+    let response: any = null;
+    let lastError: any = null;
+
+    for (const modelName of modelsToTry) {
+      let attempts = 0;
+      const maxAttempts = 2; // Riprova 2 volte sullo stesso modello in caso di errore temporaneo
+      while (attempts < maxAttempts) {
+        try {
+          response = await ai.models.generateContent({
+            model: modelName,
+            contents: prompt,
+            config: {
+              systemInstruction: systemInstruction,
+              temperature: 0.7,
+            },
+          });
+          if (response) {
+            console.log(`Generazione completata con successo utilizzando il modello: ${modelName}`);
+            break; 
+          }
+        } catch (err: any) {
+          lastError = err;
+          attempts++;
+          const errStr = JSON.stringify(err) + " " + String(err.message || err);
+          const isUnavailable = errStr.includes("503") || errStr.toLowerCase().includes("unavailable") || errStr.toLowerCase().includes("demand");
+          
+          if (isUnavailable && attempts < maxAttempts) {
+            console.warn(`Modello ${modelName} temporaneamente sovraccarico. Tentativo ${attempts}/${maxAttempts}. Attendo 1 secondo...`);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          } else {
+            break; // Salta al prossimo modello di fallback o lancia l'errore se è il modello finale
+          }
+        }
+      }
+      if (response) break; // Se abbiamo ottenuto la risposta, interrompiamo la ricerca di altri modelli
+    }
+
+    if (!response) {
+      throw lastError || new Error("I modelli di intelligenza artificiale sono temporaneamente non disponibili a causa del traffico elevato. Riprova tra pochi istanti.");
+    }
 
     const aiText = response.text || "La generazione ha restituito un testo vuoto. Riprova.";
     return res.json({ aiText });
