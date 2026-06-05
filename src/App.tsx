@@ -171,8 +171,10 @@ export default function App() {
           <p className="text-xs text-slate-400">
             In conformità alle linee guida pedagogiche scolastiche. I testi generati sono raccomandazioni bozza che il docente è invitato a convalidare prima dell'inserimento formale sul Registro Elettronico.
           </p>
-          <div className="flex justify-center items-center gap-1.5 text-[11px] text-slate-400">
-            <span>Powered by Gemini 3.5 Flash • DocenteAI</span>
+          <div className="flex flex-wrap justify-center items-center gap-2 text-[10px] text-slate-400/80">
+            <span>Powered by Gemini 3.5 Flash &bull; DocenteAI</span>
+            <span>&bull;</span>
+            <span className="text-slate-400/60 font-mono tracking-wider">Produttori: Gem3.5ftgL</span>
           </div>
         </footer>
       </div>
