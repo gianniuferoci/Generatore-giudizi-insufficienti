@@ -1,0 +1,6 @@
+{
+  "name": "Generatore Motivazioni Insufficienza",
+  "description": "Generatore intelligente di motivazioni e valutazioni per l'insufficienza scolastica di un alunno, con opzioni statiche e fluide basate su AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
